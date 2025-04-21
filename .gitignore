@@ -1,1 +1,46 @@
-venv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# C extensions
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment
+.env/
+.venv/
+env/
+venv/
+ENV/
+*.env
+
+# Python cache
+*.pyc
+*.pyd
+*.pdb
+
+# VS Code settings
+.vscode/
+
+# macOS metadata
+.DS_Store
+
+# Jupyter Notebook hidden history
+.history
+
+# MyPy and Pyre type checker caches
+.mypy_cache/
+.pyre/
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+.cache
