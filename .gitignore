@@ -12,10 +12,10 @@ __pycache__/
 # Virtual environment
 .env/
 .venv/
-env/
+#env/
 venv/
-ENV/
-*.env
+#ENV/
+#*.env
 
 # Python cache
 *.pyc
