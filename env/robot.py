@@ -28,14 +28,11 @@ from rl.rlln import *
 import xml.etree.ElementTree as ET
 import subprocess
 import time
-
-import os
 # ====================================================================================================
 
-ros_distro = os.environ.get("ROS_DISTRO")
-
 # if not using foxy replace the default path by a suitable one
-sdf_path = f"/opt/ros/{ros_distro}/share/turtlebot3_gazebo/models/turtlebot3_burger/model.sdf"
+sdf_path = "/opt/ros/foxy/share/turtlebot3_gazebo/models/turtlebot3_burger/model.sdf"
+model_path = "/opt/ros/foxy/share/turtlebot3_gazebo/worlds/turtlebot3_assessment2/burger.model"
 
 
 def name(): return 'node'+str(randint(1, 1000))
@@ -61,6 +58,28 @@ def set_nscans_LiDAR(nscans, path=sdf_path):
     # Write the modified tree back to the file
     tree.write(path)
 
+def kill_sim_processes():
+    processes = ['gzclient', 'gzserver', 'ros2']
+    for proc in processes:
+        try:
+            subprocess.run(['killall', '-9', proc], check=True)
+            print(f'Killed {proc}')
+        except subprocess.CalledProcessError:
+            print(f'No running process found for {proc}')
+
+
+def set_real_time_rate(time_rate=1000, step_rate=0.001, path=model_path):
+    # this function set the rate for the simulater for acceleration
+    # usually step_rate = 1/time_rate, but you can set them to be different
+    tree = ET.parse(path)
+    root = tree.getroot()
+    root.find('.//real_time_update_rate').text = str(time_rate)
+    root.find('.//max_step_size').text = str(step_rate)
+    tree.write(path, encoding="utf-8", xml_declaration=True)
+
+
+def accelerate_sim(speed):
+    set_real_time_rate(step_rate=0.001*speed)
 # ====================================================================================================
 
 
@@ -208,16 +227,17 @@ class RobEnv(Node):
 
     # reseting--------------------------------------------------------------
     def reset(self):
-        if self.verbose: print('resetting world..........................................')
+        # if self.verbose: print('resetting world..........................................')
+        for _ in range(2):
+            # to ensure earlier queued actions are flushed, there are better ways to do this
+            self.reset_world.call_async(Empty.Request())
+            # do not add a line to move forward one step as it will upset the reward logic
 
-        # to ensure earlier queued actions are flushed, there are better ways to do this
-        self.reset_world.call_async(Empty.Request())
+            future = self.reset_world.call_async(Empty.Request())
+            ros.spin_until_future_complete(self, future, timeout_sec=1.0)
 
-        future = self.reset_world.call_async(Empty.Request())
-        ros.spin_until_future_complete(self, future, timeout_sec=5.0)
-
-        if not future.done():
-            print("Reset not completed within timeout.")
+            if not future.done():
+                print("Reset not completed within timeout.")
 
         return self.s_()
 
@@ -244,8 +264,8 @@ class RobEnv(Node):
     # angular distance of robot to a specific goal......................................
     def θdistgoal(self, goal):
         xgoal, ygoal = goal
-        θgoal = atan2(abs(self.x - xgoal), abs(self.y - ygoal))
-        θgoal = θgoal if θgoal >= 0 else θgoal + 2 * pi # mapp [-pi, pi] to [0, 2pi]
+        θgoal = atan2(ygoal - self.y, xgoal - self.x)
+        θgoal = θgoal if θgoal >= 0 else θgoal + 2 * pi  # map to [0, 2π]
 
         θdiff = abs(θgoal - self.θ)
         return round(min(θdiff, 2*pi - θdiff), 2)

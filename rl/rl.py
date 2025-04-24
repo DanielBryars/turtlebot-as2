@@ -84,13 +84,13 @@ class MRP:
     def init_metrics(self):
         self.Ts = np.zeros(self.episodes, dtype=np.uint32)
         self.Rs = np.zeros(self.episodes)
-        self.Es = np.zeros(self.episodes)  
+        self.Es = np.zeros(self.episodes)
     
     def extend_metrics(self):
         if len(self.Ts)>=self.episodes: return # no need to resize if size is still sufficient
-        self.Ts.resize(self.episodes, refcheck=False)
-        self.Rs.resize(self.episodes, refcheck=False)
-        self.Es.resize(self.episodes, refcheck=False)
+        self.Ts = np.resize(self.Ts, self.episodes)
+        self.Rs = np.resize(self.Rs, self.episodes)
+        self.Es = np.resize(self.Es, self.episodes)
         
     # set up the V table
     def init_(self):
@@ -170,50 +170,50 @@ class MRP:
             self.t_ = 0                                        # steps counter for all episodes
         if resume:
             self.extend_metrics()
-        try:
-            #for self.ep in range(self.episodes):
-            while not self.stop_exp():
-                self.ep += 1
-                self.t  = -1                                    # steps counter for curr episode
-                self.Σr = 0
-                done = False
-                #print(self.ep)
-                # initial step
-                s,a = self.step_0()
-                self.step0()                                    # user defined init of each episode
-                # an episode is a set of steps, interact and learn from experience, online or offline.
-                while not self.stop_ep(done):
-                    #print(self.t_)
+        # try:
+        #for self.ep in range(self.episodes):
+        while not self.stop_exp():
+            self.ep += 1
+            self.t  = -1                                    # steps counter for curr episode
+            self.Σr = 0
+            done = False
+            #print(self.ep)
+            # initial step
+            s,a = self.step_0()
+            self.step0()                                    # user defined init of each episode
+            # an episode is a set of steps, interact and learn from experience, online or offline.
+            while not self.stop_ep(done):
+                #print(self.t_)
 
-                    # take one step
-                    self.t += 1
-                    self.t_+= 1
+                # take one step
+                self.t += 1
+                self.t_+= 1
 
-                    rn,sn, a,an, done = self.step(s,a, self.t)  # takes a step in env and store tarjectory if needed
-                    self.online(s, rn,sn, done, a,an) if train else None # to learn online, pass a one step trajectory
+                rn,sn, a,an, done = self.step(s,a, self.t)  # takes a step in env and store tarjectory if needed
+                self.online(s, rn,sn, done, a,an) if train else None # to learn online, pass a one step trajectory
 
-                    self.Σr += rn
-                    self.rn = rn
-                    s,a = sn,an
+                self.Σr += rn
+                self.rn = rn
+                s,a = sn,an
 
-                    # render last view episodes, for games ep might>episodes
-                    if self.visual and self.episodes > self.ep >= self.episodes-self.view: self.render(**kw)
-                
-                # to learn offline and plot episode
-                self.metrics()
-                self.offline() if train else None
-                self.plot_ep()
-                self.selfsave() if save_ep else None  # saves object in a pickle file for retrieval in case of crash
-        
-        except:
-            print(f"Either learning interrupted or an error occurred:, at state {s}")
-            try: self.env.stop()
-            finally: pass
+                # render last view episodes, for games ep might>episodes
+                if self.visual and self.episodes > self.ep >= self.episodes-self.view: self.render(**kw)
+
+            # to learn offline and plot episode
+            self.metrics()
+            self.offline() if train else None
+            self.plot_ep()
+            self.selfsave() if save_ep else None  # saves object in a pickle file for retrieval in case of crash
+
+        # except:
+        #     print(f"Either learning interrupted or an error occurred:, at state {s}")
+        #     try: self.env.stop()
+        #     finally: pass
             
-        finally:
-            # plot experience   
-            self.plot_exp(**kw)
-            return self
+        # finally:
+        # plot experience   
+        self.plot_exp(**kw)
+        return self
     # ------------------------------------- policies types 易-----------------------------------
 
     def stationary(self, *args):
@@ -272,7 +272,7 @@ class MRP:
         self.env = None # execlude the env as it will cause issues when dealing with ros
         try:
             with open(self.self_path, "wb") as f: pickle.dump(self, f)
-            print(f"Object saved to {self.self_path}")
+            # print(f"Object saved to {self.self_path}")
         except: print('could not save the file {self.self_path}')
         finally: self.env = env
         
