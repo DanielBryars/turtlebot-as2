@@ -28,15 +28,17 @@ from rl.rlln import *
 import xml.etree.ElementTree as ET
 import subprocess
 import time
+import os
+
 # ====================================================================================================
 
-# if not using foxy replace the default path by a suitable one
-sdf_path = "/opt/ros/foxy/share/turtlebot3_gazebo/models/turtlebot3_burger/model.sdf"
-model_path = "/opt/ros/foxy/share/turtlebot3_gazebo/worlds/turtlebot3_assessment2/burger.model"
+ros_distro = os.environ.get("ROS_DISTRO")
 
+# if not using foxy replace the default path by a suitable one
+sdf_path = f"/opt/ros/{ros_distro}/share/turtlebot3_gazebo/models/turtlebot3_burger/model.sdf"
+model_path = f"/opt/ros/{ros_distro}/share/turtlebot3_gazebo/worlds/turtlebot3_assessment2/burger.model"
 
 def name(): return 'node'+str(randint(1, 1000))
-
 
 def load_gazebo():
     subprocess.Popen(["ros2", "launch", "turtlebot3_gazebo", "turtlebot3_assessment2.launch.py"])
