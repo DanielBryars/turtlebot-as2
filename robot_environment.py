@@ -26,10 +26,10 @@ RIGHT = 2
 
 class vRobEnv(RobEnv):
     def __init__(self, **kw):
-        self.ignoreReset = kw.pop('ignoreReset', None)
+        self.ignoreReset = kw.pop('ignoreReset', False)
         super().__init__(ignoreReset=self.ignoreReset, **kw)
 
-        self.nF = len(self.scans) * 3 # 3 features per laser line
+        self.nF = len(self.scans)
         print('state size(laser beams)=', self.nF)
 
     def reset(self):
@@ -107,11 +107,11 @@ else:
     #    return  1*(((self.scans - min)/(max - min))>=.5)
 
     def s_(self):
-        close = (self.scans <= 0.3).astype(int)
-        medium = ((self.scans > 0.3) & (self.scans <= 0.8)).astype(int)
-        far = (self.scans > 0.8).astype(int)
-        return np.concatenate([close, medium, far])
-    
+        #State is if we're near a wall
+        states = (self.scans <= 0.3).astype(int)
+        assert states.shape[0] == 64 # self.nF
+        return states
+
 
 class HandcraftedFeatureExtractor:
     NUM_FEATURES = 6
@@ -221,14 +221,3 @@ class vRobEnvCornerDetector(vRobEnv):
         # returns a normalise and descritised componenets
         return  features_detected
     
-
-
-class nnRobEnv(vRobEnv):
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        self.nF = len(self.scans)
-    
-    def s_(self):
-        max, min = self.max_range, self.min_range
-        normalised =  ((self.scans - min)/(max - min))
-        torch.tensor(normalised, dtype=torch.float32).to("cuda")
