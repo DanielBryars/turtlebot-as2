@@ -4,6 +4,7 @@ import termios
 import time
 from math import pi
 from env.robot import *  # RobEnv, ros, etc
+from robot_environment import *
 import select
 
 # ACTIONS
@@ -59,21 +60,25 @@ def main():
     if not ros.ok():
         ros.init()
 
-    θspeed = pi / 3.5
-    speed = 2.0
-    n = 20
+    θspeed = pi / 6
+    speed = 10.0
+    n = 10
 
     print(f"n = {n}")
-    env = RobEnv(speed=speed, θspeed=θspeed, n=n, verbose=True)
+    env = vRobEnv(speed=speed, θspeed=θspeed, n=n, verbose=True)
     env.reset()
 
     print_intro()
 
+    nSteps = 0
     try:
         while True:
             key = get_key()
 
             #print(f"KeyDetected: '{key}'")
+
+            os.system('clear')  # or 'cls' if on Windows
+            print("q to quit")
 
             if key == 'q':
                 print("\nExiting...")
@@ -81,18 +86,21 @@ def main():
 
             if key in key_action_map:
                 action = key_action_map[key]
-                #print(f"{key}-->{action}")
+                print(f"{key}-->{action}")
 
                 if action == RESET:
                     env.reset()
-                    sys.stdout.write("\rEnvironment reset.                                  ")
-                    sys.stdout.flush()
+                    print("\rEnvironment reset.")
+                    
                 else:
                     obs, reward, done, info = env.step(action)
-                    sys.stdout.write(f'\rAction: {action} | Reward: {reward:.2f} | Done: {done}        ')
-                    sys.stdout.flush()
+                    nSteps += 1
+                    
 
-            #time.sleep(0.01)
+            print(f'\rAction: {action} | Reward: {reward:.2f} | Done: {done} | nSteps:{nSteps}')
+            print()
+            
+            time.sleep(0.01)
     except KeyboardInterrupt:
         print("\nInterrupted by user.")
 

@@ -94,7 +94,7 @@ class RobEnv(Node):
                  tol=.9,
                  sleep=False,
                  verbose=False,
-                 resetworld=True):
+                 ignoreReset=False):
         super().__init__(name)
 
         self.n = n
@@ -131,12 +131,13 @@ class RobEnv(Node):
         self.min_range = .35
 
         # establish a reset client
-        if (resetworld):
-            self.reset_world = self.create_client(Empty, '/reset_world')
+        self.reset_world = self.create_client(Empty, '/reset_world')
+        if (ignoreReset):
+            print("ignoreReset is True Skipping world reset")
+        else:
             while not self.reset_world.wait_for_service(timeout_sec=4.0):
                 print('world client service...')
-        else:
-            print("Skipped world reset")
+            
 
 
         # compatibility----------------------------------------------
@@ -166,7 +167,7 @@ class RobEnv(Node):
         self.figsize0 = (12, 2)  # for compatibility
         # --------------------------------------------------------------- 
         # self.rate = self.create_rate(30)
-        if resetworld:
+        if not ignoreReset:
             self.reset()
 
         print('speed  = ', self.speed)
