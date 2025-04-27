@@ -146,7 +146,7 @@ class vMDP(MDP(vMRP)):
         #print(f"{s.shape}, {a}")
         
         W = self.W if a is None else self.W[a]
-        return W.dot(s) if s is not None else np.matmul(W, self.env.S_()).T 
+        return W.dot(s) if s is not None else np.matmul(W, self.env.s_()).T 
 
     # we should have used ∇ but python does not like it
     def ΔQ(self,s): 
