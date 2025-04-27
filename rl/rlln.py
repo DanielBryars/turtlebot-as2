@@ -274,9 +274,6 @@ class Sarsaλ(vMDP):
         self.Z = self.W*0
 
     def online(self, s, rn,sn, done, a,an):
-
-        self.Z[a] = self.λ*self.γ*self.Z[a] + self.ΔQ(s)
-
         q = self.Q(s,a)
         if q is None:
             print(f"\n[DEBUG] Q returned None for state {s} and action {a}")
@@ -293,9 +290,10 @@ class Sarsaλ(vMDP):
             pdb.set_trace()  # 🔥 drop into debugger here
 
         try:
+            self.Z[a] = self.λ*self.γ*self.Z[a] + self.ΔQ(s)
             self.W[a] += self.α*(rn + (1-done)*self.γ*self.Q(sn,an)- self.Q(s,a))*self.Z[a]
         except Exception as e:
-            print(f"\n[DEBUG] Exception while calling Q: {e}")
+            print(f"\n[DEBUG] Exception in online: {e}")
             pdb.set_trace()  # 🔥 drop into debugger
             raise e  # re-raise if you want it to fail cleanly after debugging
 # ------------------------ 🌖 multi-step, value function control, online learning -----------------------

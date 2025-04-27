@@ -37,7 +37,7 @@ class vRobEnv(RobEnv):
         if (self.ignoreReset):
             print("Reset called BUT self.ignoreReset is True, so ignoring")
         else:
-            super().reset()
+            return super().reset()
 
     def nearly_atwall(self):
         # check only 2*rng front scans for collision, given the robot does not move backward
