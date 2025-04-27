@@ -143,7 +143,8 @@ class vMDP(MDP(vMRP)):
         self.Q = self.Q_
 
     def Q_(self, s=None, a=None):
-        #print(s.shape)
+        #print(f"{s.shape}, {a}")
+        
         W = self.W if a is None else self.W[a]
         return W.dot(s) if s is not None else np.matmul(W, self.env.S_()).T 
 
@@ -261,6 +262,8 @@ class trueTDλ(vMRP):
         self.vo = self.vn
     
 # ------------------------ 🌖 multi-step (value function control) online learning -----------------------
+import pdb
+
 class Sarsaλ(vMDP):
     def __init__(self, λ=.5, **kw):
         super().__init__(**kw)
@@ -271,9 +274,30 @@ class Sarsaλ(vMDP):
         self.Z = self.W*0
 
     def online(self, s, rn,sn, done, a,an):
-        self.Z[a] = self.λ*self.γ*self.Z[a] + self.ΔQ(s)
-        self.W[a] += self.α*(rn + (1-done)*self.γ*self.Q(sn,an)- self.Q(s,a))*self.Z[a]
 
+        self.Z[a] = self.λ*self.γ*self.Z[a] + self.ΔQ(s)
+
+        q = self.Q(s,a)
+        if q is None:
+            print(f"\n[DEBUG] Q returned None for state {s} and action {a}")
+            pdb.set_trace()  # 🔥 drop into debugger here
+
+        qn = self.Q(sn,an)
+        if qn is None:
+            print(f"\n[DEBUG] QN returned None for state {sn} and action {an}")
+            pdb.set_trace()  # 🔥 drop into debugger here
+
+        
+        if self.W[a] is None:
+            print(f"\n[DEBUG] self.W[a] returned None for state {sn} and action {an}")
+            pdb.set_trace()  # 🔥 drop into debugger here
+
+        try:
+            self.W[a] += self.α*(rn + (1-done)*self.γ*self.Q(sn,an)- self.Q(s,a))*self.Z[a]
+        except Exception as e:
+            print(f"\n[DEBUG] Exception while calling Q: {e}")
+            pdb.set_trace()  # 🔥 drop into debugger
+            raise e  # re-raise if you want it to fail cleanly after debugging
 # ------------------------ 🌖 multi-step, value function control, online learning -----------------------
 class trueSarsaλ(vMDP):
     def __init__(self, λ=.5, **kw):

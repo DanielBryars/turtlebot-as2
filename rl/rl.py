@@ -456,7 +456,19 @@ def MDP(MRP=MRP):
         #------------------------------------- add some more policies types 易-------------------------------
         # useful for inheritance, gives us a vector of actions values
         def Q_(self, s=None, a=None):
-            return self.Q[s] if s is not None else self.Q
+
+            #Originally return self.Q[s] if s is not None else self.Q
+
+            if s is None:
+                return self.Q  
+            
+            #just initialise to 0 for now, not sure how to handle this.
+            if s not in self.Q:
+                self.Q[s] = np.zeros(self.env.nA) 
+            
+            return self.Q[s]
+
+            
 
         # directly calculates V as a π[s] policy expectation of Q[s] 
         def V_from_Q(self, s=None):

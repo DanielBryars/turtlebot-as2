@@ -93,7 +93,8 @@ class RobEnv(Node):
                  nscans=get_nscans_LiDAR(), nscansρ=.15,
                  tol=.9,
                  sleep=False,
-                 verbose=False):
+                 verbose=False,
+                 resetworld=True):
         super().__init__(name)
 
         self.n = n
@@ -130,9 +131,13 @@ class RobEnv(Node):
         self.min_range = .35
 
         # establish a reset client
-        self.reset_world = self.create_client(Empty, '/reset_world')
-        while not self.reset_world.wait_for_service(timeout_sec=4.0):
-            print('world client service...')
+        if (resetworld):
+            self.reset_world = self.create_client(Empty, '/reset_world')
+            while not self.reset_world.wait_for_service(timeout_sec=4.0):
+                print('world client service...')
+        else:
+            print("Skipped world reset")
+
 
         # compatibility----------------------------------------------
         nturns = 16         # number of turns robot takes to complete a full circle
@@ -161,7 +166,8 @@ class RobEnv(Node):
         self.figsize0 = (12, 2)  # for compatibility
         # --------------------------------------------------------------- 
         # self.rate = self.create_rate(30)
-        self.reset()
+        if resetworld:
+            self.reset()
 
         print('speed  = ', self.speed)
         print('θspeed = ', self.θspeed)
