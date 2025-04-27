@@ -36,6 +36,7 @@ class vRobEnv(RobEnv):
         '''Override the original so we can skip the reset (used for monitoring applications)'''
         if (self.ignoreReset):
             print("Reset called BUT self.ignoreReset is True, so ignoring")
+            return self.s_()
         else:
             return super().reset()
 
@@ -220,10 +221,12 @@ class vRobEnvCornerDetector(vRobEnv):
         # returns a normalise and descritised componenets
         return  features_detected
     
+
+
 class nnRobEnv(vRobEnv):
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.nf = len(self.scans)
+        self.nF = len(self.scans)
     
     def s_(self):
         max, min = self.max_range, self.min_range
