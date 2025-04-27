@@ -112,7 +112,11 @@ class nnMRP(MRP):
             out_dim=self.action_dim,
             α=α
         )
-        model = model.to(torch.device('mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu'))
+
+        device = torch.device('mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu')
+
+        print(f"Model on device:{device}")
+        model = model.to(device)
 
         model.print_model_summary(net_str)
         return model

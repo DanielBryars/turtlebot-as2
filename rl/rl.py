@@ -358,7 +358,8 @@ class MRP(MRP):
             figsizes = list(zip(plt.gcf().get_size_inches(), self.env.figsize0))
             figsize  = [max(figsizes[0]), min(figsizes[1]) if self.plotV or self.plotE else figsizes[1][0]]
             plt.gcf().set_size_inches(figsize[0], figsize[1])
-            clear_output(wait=True)
+            #DJB don't clear the output
+            #clear_output(wait=True)
             if not plot_exp: plt.show()
 
 
