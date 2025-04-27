@@ -203,8 +203,7 @@ class MRP:
             self.metrics()
             self.offline() if train else None
 
-            if self.animate:
-                self.plot_ep()
+            self.plot_ep()
             
             self.selfsave() if save_ep else None  # saves object in a pickle file for retrieval in case of crash
 
