@@ -40,6 +40,7 @@ from env.grid import *
 from rl.rlselect import *
 from rl.dp import *
 import pickle
+import json
 # ==============================================Base class for prediction =============================================
 '''
     all other classes will inherit from this class.
@@ -340,6 +341,16 @@ class MRP(MRP):
     def plot_exp(self, label='', **kw):
         self.plot_ep(animate=True, plot_exp=True, label=label, savefig=True)
         
+    def make_json_safe(self, d):
+        safe = {}
+        for k, v in d.items():
+            try:
+                json.dumps(v)
+                safe[k] = v
+            except (TypeError, OverflowError):
+                safe[k] = type(v).__name__  # just store the type name
+        return safe
+
     def plot_ep(self, animate=None, plot_exp=False, label='', savefig=False): 
         if len(self.eplist)< self.episodes: self.eplist.append(self.ep+1)
             
@@ -373,9 +384,9 @@ class MRP(MRP):
             else:
                 if savefig:
                     descriptive_name = f'{self.desctime}.{self.__class__.__name__}.episode.{self.ep}'
-                    import json
+                    safe_params = self.make_json_safe(self.params)             
                     with open(f'{descriptive_name}.json', 'w') as f:
-                        json.dump(self.params, f, indent=2)
+                        json.dump(safe_params, f, indent=2)
                     plt.savefig(f'{descriptive_name}.png')
 
 
