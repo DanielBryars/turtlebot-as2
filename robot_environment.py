@@ -106,7 +106,7 @@ class vRobEnv(RobEnv):
 
     def s_(self):
         #State is if we're near a wall
-        states = (self.scans <= 0.3).astype(int)
+        states = (self.scans <= 0.6).astype(int)
         assert states.shape[0] == 64 # self.nF
         return states
 
