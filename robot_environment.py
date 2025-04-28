@@ -53,14 +53,12 @@ class vRobEnv(RobEnv):
         if not hasattr(self, 'Δgoal_dist'):
             return 0
 
-        '''
-if a == FORWARD and self.θgoal_dist < 0.2:  # About 11 degrees
-    alignment_reward = +0.5  # Moving forward when well aligned
-elif (a == LEFT or a == RIGHT) and self.θgoal_dist > 0.5:  # About 30 degrees
-    alignment_reward = +0.5  # Turning when badly aligned
-else:
-    alignment_reward = 0
-'''
+        if a == FORWARDS and self.θgoal_dist < 0.2:  
+            alignment_reward = +0.5  
+        elif (a == LEFT or a == RIGHT) and self.θgoal_dist > 0.5:
+            alignment_reward = +0.5  
+        else:
+            alignment_reward = 0
 
         #Don't like steps
         per_step_reward = -0.1 
@@ -72,7 +70,7 @@ else:
         goal_getting_closer_reward = -2 * self.Δgoal_dist
 
         #Going goal direction is good, away is bad
-        goal_direction_better_reward = -0.5 * self.Δθgoal_dist
+        #goal_direction_better_reward = -0.5 * self.Δθgoal_dist
 
         # let's promote moving forward
         move_forward_reward = 0.2 * (a == FORWARDS) 
@@ -84,7 +82,7 @@ else:
             per_step_reward, 
             anti_crash_into_wall_reward,
             goal_getting_closer_reward,
-            goal_direction_better_reward,
+            alignment_reward,
             move_forward_reward,
             goal_reached_reward])
         

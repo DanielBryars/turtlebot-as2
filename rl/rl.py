@@ -308,6 +308,13 @@ class MRP(MRP):
     def __init__(self, plotV=False,  plotT=False, plotR=False, plotE=False, animate=False, Vstar=None, **kw):
         super().__init__(**kw)
         
+        params = locals().copy()
+        params.pop('self')  # remove 'self' because it's not a real argument
+        self.params = params
+
+        import datetime
+        self.desctime = datetime.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')
+
         # visualisation related
         self.plotT = plotT
         self.plotR = plotR
@@ -331,9 +338,9 @@ class MRP(MRP):
         if self.plotV: self.plot_V(); plt.show()
         
     def plot_exp(self, label='', **kw):
-        self.plot_ep(animate=True, plot_exp=True, label=label)
+        self.plot_ep(animate=True, plot_exp=True, label=label, savefig=True)
         
-    def plot_ep(self, animate=None, plot_exp=False, label=''): 
+    def plot_ep(self, animate=None, plot_exp=False, label='', savefig=False): 
         if len(self.eplist)< self.episodes: self.eplist.append(self.ep+1)
             
         if animate is None: animate = self.animate
@@ -361,7 +368,15 @@ class MRP(MRP):
             figsize  = [max(figsizes[0]), min(figsizes[1]) if self.plotV or self.plotE else figsizes[1][0]]
             plt.gcf().set_size_inches(figsize[0], figsize[1])
             clear_output(wait=True)
-            if not plot_exp: plt.show()
+            if not plot_exp:
+                plt.show()
+            else:
+                if savefig:
+                    descriptive_name = f'{self.desctime}.{self.__class__.__name__}.episode.{self.ep}'
+                    import json
+                    with open(f'{descriptive_name}.json', 'w') as f:
+                        json.dump(self.params, f, indent=2)
+                    plt.savefig(f'{descriptive_name}.png')
 
 
     def plot_V(self, ep=0):
